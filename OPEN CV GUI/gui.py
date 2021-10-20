@@ -9,6 +9,9 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QFileDialog
+import imutils
+import cv2
 
 
 class Ui_MainWindow(object):
@@ -47,11 +50,33 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.pushButton.clicked.connect(self.label.clear)
+        self.pushButton.clicked.connect(self.loadImage)
         self.verticalSlider.valueChanged['int'].connect(self.label.setNum)
         self.verticalSlider_2.valueChanged['int'].connect(self.label.clear)
         self.pushButton_2.clicked.connect(self.label.clear)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+        self.pushButton_2.clicked.connect(self.loadImage)
+
+        # Added code here
+        self.filename = None  # Will hold the image address location
+        self.tmp = None  # Will hold the temporary image for display
+        self.brightness_value_now = 0  # Updated brightness value
+        self.blur_value_now = 0  # Updated blur value
+
+    def loadImage(self):
+        self.filename = QtWidgets.QFileDialog.getOpenFilename(
+            filter="Image (*.*)")
+        self.image = cv2.imread(self.filename)
+        self.setPhoto(self.image)
+
+    def setPhoto(self, image):
+        self.tmp = image
+        image = imutils.resize(image, width=300)
+        frame = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = QtGui.QImage(
+            frame, frame.shape[1], frame.shape[0], frame.strides[0], QtGui.QImage.Format_RGB888)
+        self.label.setPixmap(QtGui.QPixmap.fromImage(image))
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
